@@ -45,6 +45,9 @@ func vaultRenewDuration(d int) time.Duration {
 // durationFromCert gets a "lease" duration in seconds from cert data
 func durationFromCert(certData string) int {
 	block, _ := pem.Decode([]byte(certData))
+	if block == nil {
+		return -1
+	}
 	cert, err := x509.ParseCertificate(block.Bytes)
 	if err != nil {
 		return -1
