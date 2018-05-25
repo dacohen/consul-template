@@ -191,6 +191,7 @@ func (d *VaultWriteQuery) writeSecret(clients *ClientSet, opts *QueryOptions) (i
 		if certData, ok := certInterface.(string); ok {
 			newDuration := durationFromCert(certData)
 			if newDuration > 0 {
+				log.Printf("[TRACE] Found certificate and set lease duration to %d seconds", newDuration)
 				leaseDuration = newDuration
 			}
 		}
