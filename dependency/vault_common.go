@@ -1,6 +1,10 @@
 package dependency
 
-import "time"
+import (
+	"crypto/x509"
+	"encoding/pem"
+	"time"
+)
 
 var (
 	// VaultDefaultLeaseDuration is the default lease duration in seconds.
@@ -36,4 +40,15 @@ func vaultRenewDuration(d int) time.Duration {
 		dur = VaultDefaultLeaseDuration
 	}
 	return dur
+}
+
+// durationFromCert gets a "lease" duration in seconds from cert data
+func durationFromCert(certData string) int {
+	block, _ := pem.Decode([]byte(certData))
+	cert, err := x509.ParseCertificate(block.Bytes)
+	if err != nil {
+		return -1
+	}
+
+	return int(cert.NotAfter.Sub(cert.NotBefore).Seconds())
 }

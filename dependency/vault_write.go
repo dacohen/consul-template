@@ -185,10 +185,21 @@ func (d *VaultWriteQuery) writeSecret(clients *ClientSet, opts *QueryOptions) (i
 		log.Printf("[WARN] %s: %s", d, w)
 	}
 
+	leaseDuration := vaultSecret.LeaseDuration
+	// Check if result is a non-leased certificate, and handle accordingly
+	if certInterface, ok := vaultSecret.Data["certificate"]; ok && vaultSecret.LeaseID == "" {
+		if certData, ok := certInterface.(string); ok {
+			newDuration := durationFromCert(certData)
+			if newDuration > 0 {
+				leaseDuration = newDuration
+			}
+		}
+	}
+
 	// Create our cloned secret.
 	secret := &Secret{
 		LeaseID:       vaultSecret.LeaseID,
-		LeaseDuration: leaseDurationOrDefault(vaultSecret.LeaseDuration),
+		LeaseDuration: leaseDurationOrDefault(leaseDuration),
 		Renewable:     vaultSecret.Renewable,
 		Data:          vaultSecret.Data,
 	}
